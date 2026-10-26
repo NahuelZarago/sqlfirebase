@@ -1,0 +1,67 @@
+# ─────────────────────────────────────────────────────────────────────────────
+#  Pipeline de PRODUCCIÓN: lo que se mergea a `main` se publica en el canal
+#  `live` de Firebase Hosting.
+#
+#  ANTES DE USARLO reemplazá en este archivo:
+#    - FIREBASE_SERVICE_ACCOUNT_REEMPLAZAR → el secreto que creó
+#      `npx firebase init hosting:github`
+#    - REEMPLAZAR-POR-TU-PROJECT-ID       → tu Project ID
+# ─────────────────────────────────────────────────────────────────────────────
+name: Deploy a producción
+
+# A1: corre en cada push a `main` (incluye el merge de un PR).
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+# A4: nunca dos deploys a producción en paralelo, pero sin cancelar uno a mitad
+# de camino: el siguiente espera en cola.
+concurrency:
+  group: deploy-produccion
+  cancel-in-progress: false
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    # A5: GitHub Environment `production` (permite exigir aprobación manual en
+    # Settings → Environments).
+    environment: production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      # A2: datos del push a main.
+      - name: Build (export estático)
+        run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: 1
+          NEXT_PUBLIC_BUILD_SHA: ${{ github.sha }}
+          NEXT_PUBLIC_BUILD_REF: ${{ github.ref_name }}
+          NEXT_PUBLIC_BUILD_TIME: ${{ github.event.head_commit.timestamp }}
+
+      - name: Hashes de scripts inline para la CSP
+        run: node scripts/csp-hashes.mjs out firebase.json
+
+      - name: Deploy al canal live
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          # A3: mismo secreto que en el workflow de PR.
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_REEMPLAZAR }}
+          projectId: REEMPLAZAR-POR-TU-PROJECT-ID
+          # A3: el canal `live` es producción.
+          channelId: live

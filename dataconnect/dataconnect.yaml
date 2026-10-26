@@ -1,0 +1,14 @@
+specVersion: "v1"
+# Servicio y región: deben coincidir con lib/firebase.ts y scripts/atacar.mjs
+serviceId: "catalogo"
+location: "us-east4"
+schema:
+  source: "./schema"
+  datasource:
+    postgresql:
+      database: "fdcdb"
+      cloudSql:
+        # Instancia de la prueba sin costo (plan Spark). Se crea en el primer
+        # `npx firebase deploy --only dataconnect`.
+        instanceId: "catalogo-fdc"
+connectorDirs: ["./cursos"]

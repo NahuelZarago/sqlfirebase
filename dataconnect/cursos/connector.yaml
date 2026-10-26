@@ -1,0 +1,3 @@
+connectorId: cursos
+# No generamos SDK tipado: la app invoca las operaciones por nombre
+# desde lib/sqlconnect.ts (executeQuery(queryRef(dc, "ListCursos"))).

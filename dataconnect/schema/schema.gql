@@ -1,0 +1,41 @@
+# ─────────────────────────────────────────────────────────────────────────────
+#  Esquema relacional (PostgreSQL) de SQL Connect.
+#  Cada `type ... @table` es una tabla; cada campo, una columna.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Curso no declara `id`: SQL Connect agrega una clave primaria UUID automáticamente.
+type Curso @table {
+  titulo: String!
+  nivel: String!        # "inicial" | "intermedio" | "avanzado"
+  horas: Int!
+  descripcion: String!
+}
+
+# El id del alumno ES el uid de Firebase Auth. Al insertar, el servidor lo
+# completa con el usuario autenticado: el cliente nunca elige su propio id.
+type Alumno @table {
+  id: String! @default(expr: "auth.uid")
+  nombre: String!
+  email: String!
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
+#  L1 · Matricula: relación muchos-a-muchos Alumno <-> Curso
+#
+#  - Clave primaria COMPUESTA (alumno, curso): la base de datos garantiza que un
+#    alumno no puede estar inscripto dos veces en el mismo curso. La regla vive
+#    en PostgreSQL, no en el cliente, así que se cumple para cualquier llamador
+#    (app, script, otra app) y también ante dos requests simultáneos.
+#  - `alumno: Alumno!` genera la FK `alumnoId` (String) y
+#    `curso: Curso!`   genera la FK `cursoId`  (UUID). Ambas son NOT NULL y
+#    referencian filas existentes (integridad referencial).
+#  - `fecha` la completa el servidor con request.time: el cliente no puede
+#    mandar una fecha falsa.
+#  - Las FK quedan indexadas como parte de la PK; para listar "alumnos de un
+#    curso" conviene además un índice por cursoId (ver REFLEXION.md).
+# ─────────────────────────────────────────────────────────────────────────────
+type Matricula @table(key: ["alumno", "curso"]) {
+  alumno: Alumno!
+  curso: Curso!
+  fecha: Timestamp! @default(expr: "request.time")
+}

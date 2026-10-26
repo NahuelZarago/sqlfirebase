@@ -1,0 +1,63 @@
+# Datos iniciales: 7 cursos y 2 alumnos ficticios.
+# Se ejecuta con privilegios de admin (no pasa por @auth):
+#   emulador:    npm run seed
+#   producción:  npx firebase dataconnect:execute dataconnect/seed_data.gql
+# Usa upsert, así que se puede correr varias veces sin duplicar.
+# Los UUID son fijos: scripts/atacar.mjs usa el curso ...0003.
+mutation Seed @transaction {
+  curso_upsertMany(data: [
+    {
+      id: "0b7c1a2e-0001-4c3a-9d5e-000000000001"
+      titulo: "Git y flujos de trabajo en equipo"
+      nivel: "inicial"
+      horas: 12
+      descripcion: "Branches, pull requests, revisiones de código y resolución de conflictos."
+    }
+    {
+      id: "0b7c1a2e-0001-4c3a-9d5e-000000000002"
+      titulo: "Integración y entrega continua"
+      nivel: "intermedio"
+      horas: 16
+      descripcion: "Pipelines, entornos efímeros, despliegues progresivos y rollback."
+    }
+    {
+      id: "0b7c1a2e-0001-4c3a-9d5e-000000000003"
+      titulo: "Seguridad en aplicaciones web"
+      nivel: "avanzado"
+      horas: 20
+      descripcion: "OWASP Top 10, headers HTTP, CSP, autenticación y manejo de secretos."
+    }
+    {
+      id: "0b7c1a2e-0001-4c3a-9d5e-000000000004"
+      titulo: "Arquitecturas serverless"
+      nivel: "avanzado"
+      horas: 24
+      descripcion: "Funciones, contenedores gestionados, colas de mensajes y costos."
+    }
+    {
+      id: "0b7c1a2e-0001-4c3a-9d5e-000000000005"
+      titulo: "React desde cero"
+      nivel: "inicial"
+      horas: 18
+      descripcion: "Componentes, estado, efectos y composición."
+    }
+    {
+      id: "0b7c1a2e-0001-4c3a-9d5e-000000000006"
+      titulo: "Observabilidad y SRE"
+      nivel: "intermedio"
+      horas: 14
+      descripcion: "Logs estructurados, métricas, trazas, SLOs y alertas."
+    }
+    {
+      id: "0b7c1a2e-0001-4c3a-9d5e-000000000007"
+      titulo: "Bases de datos relacionales con PostgreSQL"
+      nivel: "intermedio"
+      horas: 16
+      descripcion: "Modelado, claves e índices, transacciones y consultas eficientes."
+    }
+  ])
+  alumno_upsertMany(data: [
+    { id: "seed-alumno-ana", nombre: "Ana Ficticia", email: "ana@ejemplo.test" }
+    { id: "seed-alumno-bruno", nombre: "Bruno Ficticio", email: "bruno@ejemplo.test" }
+  ])
+}

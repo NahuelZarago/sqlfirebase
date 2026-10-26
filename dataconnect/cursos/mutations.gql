@@ -1,0 +1,45 @@
+# ─────────────────────────────────────────────────────────────────────────────
+#  Mutations del conector "cursos".
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Ejemplo resuelto: el cliente manda solo `nombre`; el id y el email salen del
+# token de Firebase Auth, firmado y verificado en el servidor.
+mutation UpsertAlumno($nombre: String!) @auth(level: USER) {
+  alumno_upsert(data: {
+    id_expr: "auth.uid"
+    nombre: $nombre
+    email_expr: "auth.token.email"
+  })
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
+#  L2 · Inscribirme
+#  - USER: sin token -> "unauthenticated".
+#  - Inscribe SIEMPRE al usuario que llama: alumnoId_expr: "auth.uid".
+#    No acepta un id de alumno como variable (evita inscribir a otro: IDOR).
+#  - Idempotente: upsert sobre la clave compuesta (alumnoId, cursoId). Si la fila
+#    ya existe la actualiza en lugar de fallar, así que inscribirse dos veces no
+#    falla ni duplica. Con `matricula_insert` la segunda llamada violaría la
+#    clave primaria y devolvería error.
+#  - Si el curso no existe, la FK hace fallar la operación: no se pueden crear
+#    matrículas "huérfanas".
+# ─────────────────────────────────────────────────────────────────────────────
+mutation Inscribirme($cursoId: UUID!) @auth(level: USER) {
+  matricula_upsert(data: {
+    alumnoId_expr: "auth.uid"
+    cursoId: $cursoId
+  })
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
+#  L5 · DarmeDeBaja
+#  Borra por clave, y la clave incluye auth.uid: el usuario B no tiene forma de
+#  referenciar la matrícula de A, porque no puede elegir el alumnoId.
+#  Si no existía la matrícula, no borra nada (y tampoco falla).
+# ─────────────────────────────────────────────────────────────────────────────
+mutation DarmeDeBaja($cursoId: UUID!) @auth(level: USER) {
+  matricula_delete(key: {
+    alumnoId_expr: "auth.uid"
+    cursoId: $cursoId
+  })
+}

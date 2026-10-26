@@ -1,0 +1,36 @@
+# Catálogo: público a propósito (no contiene datos personales).
+query ListCursos
+  @auth(level: PUBLIC, insecureReason: "Catálogo público de cursos: no contiene datos personales.") {
+  cursos(orderBy: [{ titulo: ASC }]) {
+    id
+    titulo
+    nivel
+    horas
+    descripcion
+  }
+}
+
+# L3 · MisInscripciones: solo las del usuario que llama (auth.uid), sin $alumnoId (evita IDOR).
+query MisInscripciones @auth(level: USER) {
+  alumno(key: { id_expr: "auth.uid" }) {
+    nombre
+    matriculas: matriculas_on_alumno(orderBy: [{ fecha: DESC }]) {
+      fecha
+      curso {
+        id
+        titulo
+        nivel
+        horas
+      }
+    }
+  }
+}
+
+# L4 · ListAlumnos: antes PUBLIC (exponía nombre y email de todos). Ahora NO_ACCESS:
+# ningún cliente la puede ejecutar; solo código de confianza con el Admin SDK.
+   query ListAlumnos @auth(level: NO_ACCESS) {  alumnos {
+    id
+    nombre
+    email
+  }
+}
