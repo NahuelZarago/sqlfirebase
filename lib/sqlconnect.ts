@@ -22,7 +22,7 @@ export const mismoId = (a: string, b: string) =>
 
 export async function listarCursos(): Promise<Curso[]> {
   const { dc } = firebase();
-  const r = await executeQuery(queryRef<{ cursos: Curso[] }, undefined>(dc, "ListCursos"));
+  const r = await executeQuery(queryRef<{ cursos: Curso[] }>(dc, "ListCursos"));  
   return r.data.cursos;
 }
 
@@ -43,7 +43,7 @@ export async function darmeDeBaja(cursoId: string): Promise<void> {
 
 export async function misInscripciones(): Promise<MisInscripcionesData> {
   const { dc } = firebase();
-  const r = await executeQuery(queryRef<MisInscripcionesData, undefined>(dc, "MisInscripciones"));
+  const r = await executeQuery(queryRef<MisInscripcionesData>(dc, "MisInscripciones"));  
   return r.data;
 }
 
