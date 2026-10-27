@@ -61,7 +61,7 @@ jobs:
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           # A3: mismo secreto que en el workflow de PR.
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_REEMPLAZAR }}
-          projectId: REEMPLAZAR-POR-TU-PROJECT-ID
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_PROYECTO_PA_38252 }}
+          projectId: proyecto-pa-38252
           # A3: el canal `live` es producción.
           channelId: live
